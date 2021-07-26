@@ -1,0 +1,62 @@
+For this  part of your analysis, you are going to choose the type of analysis you want to conduct on the Yelp dataset and are going to prepare the data for analysis.
+
+Ideas for analysis include: Parsing out keywords and business attributes for sentiment analysis, clustering businesses to find commonalities or anomalies between them, predicting the overall star rating for a business, predicting the number of fans a user will have, and so on. These are just a few examples to get you started, so feel free to be creative and come up with your own problem you want to solve. Provide answers, in-line, to all of the following:
+type of analysis you chose to do:
+         Predicting whether a business will stay open or close. We wish not to explicitly
+		examine the text of the reviews, but this would be an interesting analysis.
+	
+    To better help businesses understand the importance of different factors which
+		will help their business stay open. Some data that may be important; number of
+		reviews, star rating of business, hours open, and of course location location
+		location. We will gather the latitude and longitude as well as city, state, 
+		postal_code, and address to make processing easier later on. Categories and 
+		attributes will be used to better distinguish between different types of 
+		businesses. `is_open` will determine which business is open and which business 
+		have closed (not hours) but permanently.        
+                           
+              
+
+       
+    SQL code you used to create your final dataset:
+                    SELECT B.id,
+			   B.name,
+			   B.address,
+			   B.city,
+			   B.state,
+			   B.postal_code,
+			   B.latitude,
+			   B.longitude,
+			   B.review_count,
+			   B.stars,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%monday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS monday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%tuesday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS tuesday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%wednesday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS wednesday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%thursday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS thursday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%friday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS friday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%saturday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS saturday_hours,
+			   MAX(CASE
+			   WHEN H.hours LIKE "%sunday%" THEN TRIM(H.hours,'%MondayTuesWednesThursFriSatSun|%') 
+			   END) AS sunday_hours,
+			   GROUP_CONCAT(DISTINCT(C.category)) AS categories,
+			   GROUP_CONCAT(DISTINCT(A.name)) AS attributes,
+			   B.is_open
+		FROM business B
+		INNER JOIN hours H
+		ON B.id = H.business_id
+		INNER JOIN category C
+		ON B.id = C.business_id
+		INNER JOIN attribute A
+		ON B.id = A.business_id
+		GROUP BY B.id
